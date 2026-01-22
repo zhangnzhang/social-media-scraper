@@ -73,8 +73,9 @@ async function scrapeItem(item) {
                  item.platform === 'instagram' ? scrapeInstagram :
                  item.platform === 'facebook' ? scrapeFacebook :
                  item.platform === 'youtube' ? scrapeYouTube :
-                 item.platform === 'tiktok' ? scrapeTikTok : null;
-    const data = await scrapeWithRetry(tabId, func);
+                 item.platform === 'tiktok' ? scrapeTikTok :
+                 item.platform === 'x' ? scrapeX : null;
+    const data = await scrapeWithRetry(tabId, func, item.platform);
 
     if (data && !data.error) {
       results[key] = { ...data, status: 'done' };
@@ -113,16 +114,20 @@ function waitForTabLoad(tabId) {
   });
 }
 
-async function scrapeWithRetry(tabId, func) {
-  for (let i = 0; i < 6; i++) {
-    await sleep(i === 0 ? 3000 : 2000);
+async function scrapeWithRetry(tabId, func, platform) {
+  const maxRetries = platform === 'pinterest' ? 10 : 6;
+  const initialWait = platform === 'pinterest' ? 4000 : 3000;
+
+  for (let i = 0; i < maxRetries; i++) {
+    await sleep(i === 0 ? initialWait : 2500);
     try {
       const result = await chrome.scripting.executeScript({
         target: { tabId },
         func
       });
       const data = result[0]?.result;
-      if (data && data.followers !== null && data.followers !== undefined) {
+      // 检查 followers 是否有值（数字或非空字符串）
+      if (data && (data.followers || data.followers === 0)) {
         return data;
       }
     } catch (e) {
@@ -149,84 +154,41 @@ function scrapePinterest() {
     return { error: 'invalid_path', path };
   }
 
-  function parseCount(str) {
-    if (!str) return null;
-    str = str.replace(/,/g, '');
-    // 匹配 "7.9 万" 或 "7.9万" 或 "79000" 或 "15"
-    const match = str.match(/([\d.]+)\s*(万|k|m|千|百万)?/i);
-    if (!match) return null;
-    let num = parseFloat(match[1]);
-    if (isNaN(num)) return null;
-    const unit = (match[2] || '').toLowerCase();
-    if (unit === '万') num *= 10000;
-    else if (unit === '千') num *= 1000;
-    else if (unit === '百万' || unit === 'm') num *= 1000000;
-    else if (unit === 'k') num *= 1000;
-    return Math.round(num);
-  }
-
-  let followers = null, following = null;
-  let debug = { method: null, followersText: null, followingText: null };
+  let followersText = null, followingText = null;
 
   // 方法1: data-test-id 选择器
   const followersEl = document.querySelector('[data-test-id="profile-followers-count"]');
   const followingEl = document.querySelector('[data-test-id="profile-following-count"]');
 
   if (followersEl) {
-    const text = followersEl.innerText || '';
-    debug.followersText = text;
-    debug.method = 'data-test-id';
-    followers = parseCount(text);
+    followersText = (followersEl.textContent || '').trim();
   }
-
   if (followingEl) {
-    const text = followingEl.innerText || '';
-    debug.followingText = text;
-    following = parseCount(text);
+    followingText = (followingEl.textContent || '').trim();
   }
 
-  // 方法2: 从页面文本提取 (如果方法1失败)
-  if (followers === null) {
+  // 方法2: 从页面文本提取
+  if (!followersText) {
     const text = document.body.innerText;
-    // 匹配中文: "7.9 万 位粉丝" 或 "79000 位粉丝"
-    let match = text.match(/([\d.]+)\s*(万|k|m|千|百万)?\s*(位粉丝|粉丝)/i);
-    if (match) {
-      followers = parseCount(match[1] + ' ' + (match[2] || ''));
-      debug.method = 'body-text-cn';
-    }
-    // 匹配英文: "79K followers"
-    if (followers === null) {
-      match = text.match(/([\d.]+)\s*(k|m)?\s*followers/i);
-      if (match) {
-        followers = parseCount(match[1] + (match[2] || ''));
-        debug.method = 'body-text-en';
-      }
-    }
+    // 匹配 "9,450 位粉丝" 或 "7.9 万 位粉丝" 或 "9.4K followers"
+    const match = text.match(/[\d,.]+\s*(万|k|m)?\s*(位粉丝|粉丝|followers)/i);
+    if (match) followersText = match[0];
   }
 
-  if (following === null) {
+  if (!followingText) {
     const text = document.body.innerText;
-    // 匹配中文: "15 关注"
-    let match = text.match(/([\d.]+)\s*(万|k|m|千|百万)?\s*(位关注|关注中|关注)/i);
-    if (match) {
-      following = parseCount(match[1] + ' ' + (match[2] || ''));
-    }
-    // 匹配英文: "15 following"
-    if (following === null) {
-      match = text.match(/([\d.]+)\s*(k|m)?\s*following/i);
-      if (match) {
-        following = parseCount(match[1] + (match[2] || ''));
-      }
-    }
+    // 匹配 "433 关注" 或 "15 following"
+    const match = text.match(/[\d,.]+\s*(万|k|m)?\s*(关注|following)/i);
+    if (match) followingText = match[0];
   }
 
   return {
     platform: 'pinterest',
     username,
     url: window.location.href,
-    followers,
-    following,
-    debug
+    followers: followersText,
+    following: followingText,
+    rawText: true
   };
 }
 
@@ -474,5 +436,63 @@ function scrapeTikTok() {
     followers,
     following,
     likes
+  };
+}
+
+function scrapeX() {
+  const path = window.location.pathname;
+  const pathMatch = path.match(/^\/([a-zA-Z0-9_]+)\/?$/);
+  const username = pathMatch?.[1];
+
+  if (!username || ['home', 'explore', 'search', 'messages', 'notifications', 'settings', 'i', 'login'].includes(username)) {
+    return { error: 'invalid_path' };
+  }
+
+  function parseCount(str) {
+    if (!str) return null;
+    str = str.replace(/,/g, '');
+    const match = str.match(/([\d.]+)\s*(万|k|m|千|百万)?/i);
+    if (!match) return null;
+    let num = parseFloat(match[1]);
+    const unit = (match[2] || '').toLowerCase();
+    if (unit === '万') num *= 10000;
+    else if (unit === '千' || unit === 'k') num *= 1000;
+    else if (unit === '百万' || unit === 'm') num *= 1000000;
+    return Math.round(num);
+  }
+
+  let followers = null, following = null;
+
+  // 方法1: 从链接获取
+  document.querySelectorAll('a').forEach(a => {
+    const href = a.href || '';
+    const text = a.innerText || '';
+    if (href.includes('/following') && following === null) {
+      following = parseCount(text);
+    }
+    if ((href.includes('/followers') || href.includes('/verified_followers')) && followers === null) {
+      followers = parseCount(text);
+    }
+  });
+
+  // 方法2: 从页面文本提取
+  if (followers === null) {
+    const text = document.body.innerText;
+    const match = text.match(/([\d,.]+)\s*(万|k|m)?\s*(Followers|粉丝)/i);
+    if (match) followers = parseCount(match[1] + (match[2] || ''));
+  }
+
+  if (following === null) {
+    const text = document.body.innerText;
+    const match = text.match(/([\d,.]+)\s*(万|k|m)?\s*Following/i);
+    if (match) following = parseCount(match[1] + (match[2] || ''));
+  }
+
+  return {
+    platform: 'x',
+    username,
+    url: window.location.href,
+    followers,
+    following
   };
 }

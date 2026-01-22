@@ -110,6 +110,13 @@ scanBtn.addEventListener('click', async () => {
           links.push({ username: ttMatch[2], url: href, platform: 'tiktok' });
         }
       }
+
+      const xMatch = href.match(/https?:\/\/(www\.)?(x|twitter)\.com\/([a-zA-Z0-9_]+)\/?$/);
+      if (xMatch && !['home', 'explore', 'search', 'messages', 'notifications', 'settings', 'i', 'login'].includes(xMatch[3])) {
+        if (!links.find(l => l.username === xMatch[3] && l.platform === 'x')) {
+          links.push({ username: xMatch[3], url: href, platform: 'x' });
+        }
+      }
     });
 
     if (links.length === 0) {
@@ -174,8 +181,8 @@ function renderResults(results) {
           <div class="loading-text"><div class="mini-spinner"></div>正在抓取数据...</div>
         ` : item.status === 'done' ? `
           <div class="stats">
-            <div class="stat-item"><span>粉丝:</span><span class="stat-value">${formatNumber(item.followers)}</span></div>
-            <div class="stat-item"><span>关注:</span><span class="stat-value">${formatNumber(item.following)}</span></div>
+            <div class="stat-item"><span>粉丝:</span><span class="stat-value">${item.rawText ? (item.followers || '-') : formatNumber(item.followers)}</span></div>
+            <div class="stat-item"><span>关注:</span><span class="stat-value">${item.rawText ? (item.following || '-') : formatNumber(item.following)}</span></div>
             ${item.posts ? `<div class="stat-item"><span>帖子:</span><span class="stat-value">${formatNumber(item.posts)}</span></div>` : ''}
             ${item.likes ? `<div class="stat-item"><span>点赞:</span><span class="stat-value">${formatNumber(item.likes)}</span></div>` : ''}
             ${item.videos ? `<div class="stat-item"><span>视频:</span><span class="stat-value">${formatNumber(item.videos)}</span></div>` : ''}
