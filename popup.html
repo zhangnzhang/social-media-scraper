@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      width: 400px;
+      min-height: 200px;
+      padding: 15px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 13px;
+      margin: 0;
+    }
+    h3 { margin: 0 0 12px 0; font-size: 16px; }
+    .btn-row { display: flex; gap: 8px; margin-bottom: 12px; }
+    button {
+      flex: 1;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+    .btn-primary { background: #e60023; color: white; }
+    .btn-primary:hover { background: #ad081b; }
+    .btn-secondary { background: #eee; color: #333; }
+    .btn-secondary:hover { background: #ddd; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    #status {
+      padding: 10px;
+      background: #f0f7ff;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      display: none;
+      color: #0066cc;
+      font-size: 12px;
+    }
+    #status.show { display: flex; align-items: center; gap: 8px; }
+    .spinner {
+      width: 14px; height: 14px;
+      border: 2px solid #0066cc;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      color: #666;
+      font-size: 12px;
+    }
+    #results { }
+    .result-item {
+      padding: 12px;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      background: #fafafa;
+      transition: all 0.3s;
+    }
+    .result-item.loading {
+      background: #f8f8f8;
+      border-color: #ddd;
+    }
+    .result-item.done { background: #f0fff4; border-color: #c6f6d5; }
+    .result-item.error { background: #fff5f5; border-color: #fed7d7; }
+    .result-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .platform-badge {
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+      color: white;
+    }
+    .platform-pinterest { background: #e60023; }
+    .platform-instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+    .platform-facebook { background: #1877f2; }
+    .platform-youtube { background: #ff0000; }
+    .platform-tiktok { background: #000000; }
+    .username { font-weight: 600; color: #333; }
+    .status-badge {
+      margin-left: auto;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .status-loading { background: #e3f2fd; color: #1976d2; }
+    .status-done { background: #e8f5e9; color: #388e3c; }
+    .status-error { background: #ffebee; color: #d32f2f; }
+    .stats { display: flex; gap: 12px; color: #666; font-size: 12px; flex-wrap: wrap; }
+    .stat-item { display: flex; align-items: center; gap: 4px; }
+    .stat-value { font-weight: 600; color: #333; }
+    .no-data { color: #999; text-align: center; padding: 30px; }
+    .link {
+      font-size: 11px;
+      color: #0066cc;
+      text-decoration: none;
+      word-break: break-all;
+      display: block;
+      margin-top: 6px;
+    }
+    .link:hover { text-decoration: underline; }
+    .loading-text {
+      color: #999;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .mini-spinner {
+      width: 10px; height: 10px;
+      border: 2px solid #999;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    .retry-btn {
+      background: none;
+      border: 1px solid #999;
+      color: #666;
+      padding: 2px 8px;
+      font-size: 11px;
+      border-radius: 4px;
+      cursor: pointer;
+      flex: none;
+    }
+    .retry-btn:hover { background: #f5f5f5; border-color: #666; }
+  </style>
+</head>
+<body>
+  <h3>Social Media Scraper</h3>
+  <div class="btn-row">
+    <button id="scanBtn" class="btn-primary">扫描当前页面</button>
+    <button id="clearBtn" class="btn-secondary">清空</button>
+  </div>
+  <div id="status"><div class="spinner"></div><span id="statusText"></span></div>
+  <div class="results-header">
+    <span>抓取结果</span>
+    <span id="count">0 条</span>
+  </div>
+  <div id="results">
+    <div class="no-data">点击扫描开始抓取社媒数据</div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

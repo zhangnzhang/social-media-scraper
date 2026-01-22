@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Social Media Scraper",
+  "version": "1.0",
+  "description": "Scan and scrape social media profiles",
+  "permissions": ["tabs", "storage", "scripting", "activeTab", "tabGroups"],
+  "host_permissions": [
+    "https://*.pinterest.com/*",
+    "https://*.pinterest.ca/*",
+    "https://*.pinterest.co.uk/*",
+    "https://*.pinterest.de/*",
+    "https://*.pinterest.fr/*",
+    "https://*.instagram.com/*",
+    "https://*.facebook.com/*",
+    "https://*.youtube.com/*",
+    "https://*.tiktok.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
