@@ -1,6 +1,6 @@
-# my-ai-project
+# social-media-scraper
 
-这是一个Vibe Coding完成的浏览器插件示例项目。作用是一键检测当前网站所有社媒并抓取关键数据。
+这是一个Vibe Coding完成的Chrome浏览器插件项目。作用是一键检测当前网站所有社媒并抓取关键数据。
 
 ## 如何下载
 1. 点击右上角 Code
