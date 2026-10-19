@@ -1,17 +1,36 @@
 # social-media-scraper
 
-这是一个Vibe Coding完成的Chrome浏览器插件项目。作用是一键检测当前网站所有社媒并抓取关键数据。
+English | [简体中文](README.zh-CN.md)
 
-## 如何下载
-1. 点击右上角 Code
-2. 选择 Download ZIP
-3. 解压到本地
+A Chrome extension, built with vibe coding, that detects every social media profile linked from the current website in one click and pulls their key stats.
 
-## 如何使用（Chrome 插件）
-1. 打开 chrome://extensions/
-2. 开启开发者模式
-3. 点击“加载已解压的扩展程序”
-4. 选择本项目文件夹
+## Features
 
-## 说明
-本项目仅用于学习和交流。
+- Finds social media links on the current page (from `<a>` tags and JSON-LD structured data)
+- Supports Instagram, Facebook, YouTube, TikTok, X (Twitter) and Pinterest
+- Scrapes all profiles in parallel and shows followers, following, posts, likes and videos where available
+- Retry button for profiles that failed or returned no data
+- Works with both English and Chinese versions of the platforms' pages
+
+## Download
+
+1. Click the green **Code** button at the top right of this page
+2. Choose **Download ZIP**
+3. Unzip it on your computer
+
+## Install (Chrome extension)
+
+1. Open `chrome://extensions/`
+2. Turn on **Developer mode**
+3. Click **Load unpacked**
+4. Select this project's folder
+
+## Usage
+
+1. Open any website you want to check
+2. Click the extension icon in the toolbar
+3. Click **Scan current page**
+
+## Disclaimer
+
+This project is for learning and sharing only. Respect each platform's terms of service when using it.

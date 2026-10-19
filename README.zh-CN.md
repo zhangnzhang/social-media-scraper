@@ -1,0 +1,19 @@
+# social-media-scraper
+
+[English](README.md) | 简体中文
+
+这是一个Vibe Coding完成的Chrome浏览器插件项目。作用是一键检测当前网站所有社媒并抓取关键数据。
+
+## 如何下载
+1. 点击右上角 Code
+2. 选择 Download ZIP
+3. 解压到本地
+
+## 如何使用（Chrome 插件）
+1. 打开 chrome://extensions/
+2. 开启开发者模式
+3. 点击“加载已解压的扩展程序”
+4. 选择本项目文件夹
+
+## 说明
+本项目仅用于学习和交流。
